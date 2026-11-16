@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 
-class WorkOrdersScreen extends StatelessWidget {
+class AccidentReportsScreen extends StatelessWidget {
   final AppData appData;
   final Future<void> Function() onChanged;
 
-  const WorkOrdersScreen({
+  const AccidentReportsScreen({
     super.key,
     required this.appData,
     required this.onChanged,
@@ -20,34 +20,45 @@ class WorkOrdersScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Work Orders', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Accident Reports', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Sequence format: GRG-1, GRG-2, ...', style: TextStyle(color: Colors.white70)),
+            const Text('Sequence format: ACC-1, ACC-2, ...', style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.photo_camera_rounded),
+              label: const Text('Create Accident Report'),
+            ),
+            const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: appData.workOrders.length,
+                itemCount: appData.accidentReports.length,
                 itemBuilder: (context, index) {
-                  final order = appData.workOrders[index];
+                  final accident = appData.accidentReports[index];
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ExpansionTile(
-                      title: Text('${order.workOrderNumber} • ${order.vehiclePlate}'),
-                      subtitle: Text('${order.department} • ${order.technician}'),
+                      title: Text('${accident.reportNumber} • ${accident.vehiclePlate}'),
+                      subtitle: Text('${accident.driverName} • ${accident.severity}'),
+                      trailing: Chip(label: Text(accident.status.name)),
                       children: [
-                        ListTile(title: Text(order.issueSummary)),
-                        ListTile(title: Text('Requested by: ${order.requestedBy}')),
-                        ListTile(title: Text('Status: ${order.status.name}')),
-                        if (order.items.isNotEmpty)
-                          ListTile(
-                            title: const Text('Parts Used'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: order.items
-                                  .map((part) => Text('${part.partName} • ${part.serialNumber} • Qty: ${part.quantity}'))
-                                  .toList(),
+                        ListTile(title: Text(accident.description)),
+                        ListTile(title: Text('Images attached: ${accident.imagePaths.length}')),
+                        ListTile(title: Text('Status: ${accident.status.name}')),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.camera_alt_rounded),
+                              label: const Text('Add 4 Images'),
                             ),
-                          ),
+                            TextButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.picture_as_pdf_rounded),
+                              label: const Text('Export PDF'),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   );

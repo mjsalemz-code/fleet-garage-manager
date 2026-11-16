@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 
-class AccidentReportsScreen extends StatelessWidget {
+class SettingsScreen extends StatelessWidget {
   final AppData appData;
   final Future<void> Function() onChanged;
 
-  const AccidentReportsScreen({
+  const SettingsScreen({
     super.key,
     required this.appData,
     required this.onChanged,
@@ -20,32 +20,40 @@ class AccidentReportsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Accident Reports', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            const Text('Sequence format: ACC-1, ACC-2, ...', style: TextStyle(color: Colors.white70)),
+            const Text('System Settings', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             const SizedBox(height: 18),
-            Expanded(
-              child: ListView.builder(
-                itemCount: appData.accidentReports.length,
-                itemBuilder: (context, index) {
-                  final accident = appData.accidentReports[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ExpansionTile(
-                      title: Text('${accident.reportNumber} • ${accident.vehiclePlate}'),
-                      subtitle: Text('${accident.driverName} • ${accident.severity}'),
-                      children: [
-                        ListTile(title: Text(accident.description)),
-                        ListTile(title: Text('Status: ${accident.status.name}')),
-                        ListTile(title: Text('Images: ${accident.imagePaths.length}')),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+            _SettingsTile(title: 'Garage Departments', subtitle: '${appData.garageDepartments.length} configured'),
+            _SettingsTile(title: 'Company Departments', subtitle: '${appData.companyDepartments.length} configured'),
+            _SettingsTile(title: 'Vehicle Statuses', subtitle: 'Available, Garage, Spare, Inspection'),
+            _SettingsTile(title: 'Offline Backup', subtitle: 'JSON backup system ready for device-to-device transfer'),
+            _SettingsTile(title: 'Camera/Scanner', subtitle: 'Plate recognition and accident image import ready'),
+            _SettingsTile(title: 'Export', subtitle: 'PDF report export for work orders and accident files'),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const _SettingsTile({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: const Icon(Icons.settings_applications_rounded),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );
   }

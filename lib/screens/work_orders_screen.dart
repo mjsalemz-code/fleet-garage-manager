@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 
-class FleetScreen extends StatelessWidget {
+class WorkOrdersScreen extends StatelessWidget {
   final AppData appData;
   final Future<void> Function() onChanged;
 
-  const FleetScreen({
+  const WorkOrdersScreen({
     super.key,
     required this.appData,
     required this.onChanged,
@@ -20,29 +20,54 @@ class FleetScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Fleet Vehicles', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const Text('Work Orders', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text('Sequence format: GRG-1, GRG-2, ...', style: TextStyle(color: Colors.white70)),
             const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.assignment_add_rounded),
+              label: const Text('New Work Order'),
+            ),
+            const SizedBox(height: 12),
             Expanded(
               child: ListView.builder(
-                itemCount: appData.vehicles.length,
+                itemCount: appData.workOrders.length,
                 itemBuilder: (context, index) {
-                  final vehicle = appData.vehicles[index];
+                  final order = appData.workOrders[index];
+                  final partsText = order.items.isEmpty
+                      ? 'No parts recorded'
+                      : order.items.map((part) => '${part.partName} (${part.quantity})').join(', ');
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: const CircleAvatar(
-                        child: Icon(Icons.local_shipping_rounded),
-                      ),
-                      title: Text('${vehicle.make} ${vehicle.model} (${vehicle.plateNumber})'),
-                      subtitle: Text('Driver: ${vehicle.driverName} • Department: ${vehicle.driverDepartment}'),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(vehicle.status.name),
-                          Text(vehicle.assignedDepartment),
-                        ],
-                      ),
+                    child: ExpansionTile(
+                      title: Text('${order.workOrderNumber} • ${order.vehiclePlate}'),
+                      subtitle: Text('${order.department} • ${order.technician}'),
+                      trailing: Chip(label: Text(order.status.name)),
+                      children: [
+                        ListTile(title: Text(order.issueSummary)),
+                        ListTile(title: Text('Requested by: ${order.requestedBy}')),
+                        ListTile(title: Text('Vehicle: ${order.vehicleMake} ${order.vehicleModel}')),
+                        ListTile(
+                          title: const Text('Parts Used'),
+                          subtitle: Text(partsText),
+                        ),
+                        Row(
+                          children: [
+                            TextButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.print_rounded),
+                              label: const Text('Print'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.picture_as_pdf_rounded),
+                              label: const Text('Export PDF'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   );
                 },

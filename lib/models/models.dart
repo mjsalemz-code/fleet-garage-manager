@@ -1,330 +1,332 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
-import 'models/models.dart';
-import 'screens/home_screen.dart';
-import 'screens/fleet_screen.dart';
-import 'screens/work_orders_screen.dart';
-import 'screens/accident_reports_screen.dart';
-import 'screens/settings_screen.dart';
-import 'services/local_data_store.dart';
+class AppData {
+  final List<Vehicle> vehicles;
+  final List<GarageDepartment> garageDepartments;
+  final List<CompanyDepartment> companyDepartments;
+  final List<WorkOrder> workOrders;
+  final List<AccidentReport> accidentReports;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
-  ]);
-
-  runApp(const FleetGarageApp());
-}
-
-class FleetGarageApp extends StatelessWidget {
-  const FleetGarageApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Fleet Garage Manager',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0F172A),
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: const Color(0xFF0B1220),
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          elevation: 0,
-          backgroundColor: Color(0xFF111827),
-        ),
-      ),
-      home: const FleetGarageHomePage(),
-    );
-  }
-}
-
-class FleetGarageHomePage extends StatefulWidget {
-  const FleetGarageHomePage({super.key});
-
-  @override
-  State<FleetGarageHomePage> createState() => _FleetGarageHomePageState();
-}
-
-class _FleetGarageHomePageState extends State<FleetGarageHomePage> {
-  final LocalDataStore _store = LocalDataStore();
-  final Uuid _uuid = const Uuid();
-
-  late AppData _appData;
-  int _selectedIndex = 0;
-  bool _menuExpanded = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    final data = await _store.load();
-    setState(() {
-      _appData = data;
-    });
-  }
-
-  Future<void> _saveData() async {
-    await _store.save(_appData);
-  }
-
-  void _addSampleData() {
-    setState(() {
-      _appData = AppData(
-        vehicles: [
-          Vehicle(
-            id: _uuid.v4(),
-            plateNumber: 'ABC-1234',
-            make: 'Toyota',
-            model: 'Hiace',
-            year: 2022,
-            status: VehicleStatus.available,
-            driverName: 'Samir Ali',
-            driverDepartment: 'Logistics',
-            assignedDepartment: 'Operations',
-            mileage: 45678,
-            vin: 'VIN-01',
-          ),
-          Vehicle(
-            id: _uuid.v4(),
-            plateNumber: 'MJD-9087',
-            make: 'Ford',
-            model: 'Transit',
-            year: 2021,
-            status: VehicleStatus.garage,
-            driverName: 'Ibrahim Noor',
-            driverDepartment: 'Maintenance',
-            assignedDepartment: 'Operations',
-            mileage: 67340,
-            vin: 'VIN-02',
-          ),
-        ],
-        garageDepartments: [
-          GarageDepartment(id: _uuid.v4(), name: 'Mechanical', isActive: true),
-          GarageDepartment(id: _uuid.v4(), name: 'Electrical', isActive: true),
-          GarageDepartment(id: _uuid.v4(), name: 'Cooling System', isActive: true),
-          GarageDepartment(id: _uuid.v4(), name: 'Oil Services', isActive: true),
-          GarageDepartment(id: _uuid.v4(), name: 'Paint & Denting', isActive: true),
-          GarageDepartment(id: _uuid.v4(), name: 'Tires', isActive: true),
-        ],
-        companyDepartments: [
-          CompanyDepartment(id: _uuid.v4(), name: 'Operations', isActive: true),
-          CompanyDepartment(id: _uuid.v4(), name: 'Logistics', isActive: true),
-          CompanyDepartment(id: _uuid.v4(), name: 'Fleet Administration', isActive: true),
-        ],
-        workOrders: [
-          WorkOrder(
-            id: _uuid.v4(),
-            workOrderNumber: 'GRG-1',
-            vehiclePlate: 'MJD-9087',
-            vehicleId: _uuid.v4(),
-            vehicleMake: 'Ford',
-            vehicleModel: 'Transit',
-            issueSummary: 'Brake inspection and replacement',
-            requestedBy: 'Fleet admin',
-            department: 'Mechanical',
-            technician: 'Ali Hassan',
-            status: WorkOrderStatus.inProgress,
-            createdAt: DateTime.now().subtract(const Duration(days: 2)),
-            items: [
-              PartUsage(partName: 'Brake Pad', serialNumber: 'BP-112', quantity: 2),
-            ],
-          ),
-        ],
-        accidentReports: [
-          AccidentReport(
-            id: _uuid.v4(),
-            reportNumber: 'ACC-1',
-            vehiclePlate: 'ABC-1234',
-            vehicleId: _uuid.v4(),
-            driverName: 'Samir Ali',
-            description: 'Minor front bumper impact while parking',
-            severity: 'Medium',
-            status: AccidentStatus.open,
-            createdAt: DateTime.now().subtract(const Duration(days: 1)),
-            imagePaths: const [],
-          ),
-        ],
-      );
-      _saveData();
-    });
-  }
-
-  Widget _buildPage() {
-    switch (_selectedIndex) {
-      case 0:
-        return HomeScreen(appData: _appData, onRefresh: _saveData);
-      case 1:
-        return FleetScreen(appData: _appData, onChanged: _saveData);
-      case 2:
-        return WorkOrdersScreen(appData: _appData, onChanged: _saveData);
-      case 3:
-        return AccidentReportsScreen(appData: _appData, onChanged: _saveData);
-      case 4:
-        return SettingsScreen(appData: _appData, onChanged: _saveData);
-      default:
-        return HomeScreen(appData: _appData, onRefresh: _saveData);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width > 900;
-
-    if (_appData.vehicles.isEmpty && _appData.workOrders.isEmpty && _appData.accidentReports.isEmpty) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.dashboard_customize_rounded, size: 72),
-              const SizedBox(height: 16),
-              const Text('No system data yet', style: TextStyle(fontSize: 24)),
-              const SizedBox(height: 12),
-              const Text('Tap below to initialize sample fleet and maintenance data.'),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: _addSampleData,
-                icon: const Icon(Icons.auto_awesome),
-                label: const Text('Initialize Demo Data'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Fleet Garage Manager'),
-        leading: isWide
-            ? IconButton(
-                onPressed: () => setState(() => _menuExpanded = !_menuExpanded),
-                icon: const Icon(Icons.menu_rounded),
-              )
-            : null,
-        actions: [
-          IconButton(
-            onPressed: _saveData,
-            icon: const Icon(Icons.save_rounded),
-            tooltip: 'Save Data',
-          ),
-          IconButton(
-            onPressed: _addSampleData,
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Refresh Demo Data',
-          ),
-        ],
-      ),
-      body: Row(
-        children: [
-          if (isWide)
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: _menuExpanded ? 220 : 84,
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.18),
-                border: const Border(right: BorderSide(color: Colors.white12)),
-              ),
-              child: NavigationRail(
-                extended: _menuExpanded,
-                backgroundColor: Colors.transparent,
-                selectedIndex: _selectedIndex,
-                onDestinationSelected: (v) => setState(() => _selectedIndex = v),
-                labelType: _menuExpanded
-                    ? NavigationRailLabelType.expanded
-                    : NavigationRailLabelType.none,
-                destinations: const [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.dashboard_rounded),
-                    label: Text('Dashboard'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.local_shipping_rounded),
-                    label: Text('Fleet'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.build_rounded),
-                    label: Text('Work Orders'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.warning_amber_rounded),
-                    label: Text('Accidents'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.settings_rounded),
-                    label: Text('Settings'),
-                  ),
-                ],
-              ),
-            ),
-          Expanded(child: _buildPage()),
-        ],
-      ),
-      drawer: !isWide
-          ? Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  const DrawerHeader(
-                    decoration: BoxDecoration(color: Color(0xFF1E293B)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.miscellaneous_services_rounded, size: 40),
-                        SizedBox(height: 8),
-                        Text('Fleet Garage', style: TextStyle(fontSize: 22)),
-                      ],
-                    ),
-                  ),
-                  _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard', index: 0, selected: _selectedIndex == 0, onTap: () => setState(() => _selectedIndex = 0)),
-                  _NavItem(icon: Icons.local_shipping_rounded, label: 'Fleet', index: 1, selected: _selectedIndex == 1, onTap: () => setState(() => _selectedIndex = 1)),
-                  _NavItem(icon: Icons.build_rounded, label: 'Work Orders', index: 2, selected: _selectedIndex == 2, onTap: () => setState(() => _selectedIndex = 2)),
-                  _NavItem(icon: Icons.warning_amber_rounded, label: 'Accidents', index: 3, selected: _selectedIndex == 3, onTap: () => setState(() => _selectedIndex = 3)),
-                  _NavItem(icon: Icons.settings_rounded, label: 'Settings', index: 4, selected: _selectedIndex == 4, onTap: () => setState(() => _selectedIndex = 4)),
-                ],
-              ),
-            )
-          : null,
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final int index;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.index,
-    required this.selected,
-    required this.onTap,
+  AppData({
+    this.vehicles = const [],
+    this.garageDepartments = const [],
+    this.companyDepartments = const [],
+    this.workOrders = const [],
+    this.accidentReports = const [],
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      selected: selected,
-      onTap: onTap,
+  Map<String, dynamic> toMap() => {
+        'vehicles': vehicles.map((e) => e.toMap()).toList(),
+        'garageDepartments': garageDepartments.map((e) => e.toMap()).toList(),
+        'companyDepartments': companyDepartments.map((e) => e.toMap()).toList(),
+        'workOrders': workOrders.map((e) => e.toMap()).toList(),
+        'accidentReports': accidentReports.map((e) => e.toMap()).toList(),
+      };
+
+  factory AppData.fromMap(Map<String, dynamic> map) {
+    return AppData(
+      vehicles: ((map['vehicles'] as List?) ?? [])
+          .map((item) => Vehicle.fromMap(item as Map<String, dynamic>))
+          .toList(),
+      garageDepartments: ((map['garageDepartments'] as List?) ?? [])
+          .map((item) => GarageDepartment.fromMap(item as Map<String, dynamic>))
+          .toList(),
+      companyDepartments: ((map['companyDepartments'] as List?) ?? [])
+          .map((item) => CompanyDepartment.fromMap(item as Map<String, dynamic>))
+          .toList(),
+      workOrders: ((map['workOrders'] as List?) ?? [])
+          .map((item) => WorkOrder.fromMap(item as Map<String, dynamic>))
+          .toList(),
+      accidentReports: ((map['accidentReports'] as List?) ?? [])
+          .map((item) => AccidentReport.fromMap(item as Map<String, dynamic>))
+          .toList(),
     );
   }
+
+  String toJson() => jsonEncode(toMap());
+
+  factory AppData.fromJson(String jsonString) => AppData.fromMap(jsonDecode(jsonString));
+
+  int nextWorkOrderSequence() {
+    var max = 0;
+    for (final order in workOrders) {
+      final parsed = int.tryParse(order.workOrderNumber.replaceFirst('GRG-', '')) ?? 0;
+      if (parsed > max) {
+        max = parsed;
+      }
+    }
+    return max + 1;
+  }
+
+  int nextAccidentSequence() {
+    var max = 0;
+    for (final report in accidentReports) {
+      final parsed = int.tryParse(report.reportNumber.replaceFirst('ACC-', '')) ?? 0;
+      if (parsed > max) {
+        max = parsed;
+      }
+    }
+    return max + 1;
+  }
+}
+
+enum VehicleStatus { available, garage, spare, inspection }
+
+enum WorkOrderStatus { pending, inProgress, completed, onHold }
+
+enum AccidentStatus { open, investigating, resolved }
+
+class Vehicle {
+  final String id;
+  final String plateNumber;
+  final String make;
+  final String model;
+  final int year;
+  final VehicleStatus status;
+  final String driverName;
+  final String driverDepartment;
+  final String assignedDepartment;
+  final int mileage;
+  final String vin;
+
+  Vehicle({
+    required this.id,
+    required this.plateNumber,
+    required this.make,
+    required this.model,
+    required this.year,
+    required this.status,
+    required this.driverName,
+    required this.driverDepartment,
+    required this.assignedDepartment,
+    required this.mileage,
+    required this.vin,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'plateNumber': plateNumber,
+        'make': make,
+        'model': model,
+        'year': year,
+        'status': status.name,
+        'driverName': driverName,
+        'driverDepartment': driverDepartment,
+        'assignedDepartment': assignedDepartment,
+        'mileage': mileage,
+        'vin': vin,
+      };
+
+  factory Vehicle.fromMap(Map<String, dynamic> map) => Vehicle(
+        id: map['id'] ?? '',
+        plateNumber: map['plateNumber'] ?? '',
+        make: map['make'] ?? '',
+        model: map['model'] ?? '',
+        year: map['year'] ?? 0,
+        status: VehicleStatus.values.firstWhere(
+          (value) => value.name == (map['status'] ?? VehicleStatus.available.name),
+          orElse: () => VehicleStatus.available,
+        ),
+        driverName: map['driverName'] ?? '',
+        driverDepartment: map['driverDepartment'] ?? '',
+        assignedDepartment: map['assignedDepartment'] ?? '',
+        mileage: map['mileage'] ?? 0,
+        vin: map['vin'] ?? '',
+      );
+}
+
+class GarageDepartment {
+  final String id;
+  final String name;
+  final bool isActive;
+
+  GarageDepartment({
+    required this.id,
+    required this.name,
+    required this.isActive,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'isActive': isActive,
+      };
+
+  factory GarageDepartment.fromMap(Map<String, dynamic> map) => GarageDepartment(
+        id: map['id'] ?? '',
+        name: map['name'] ?? '',
+        isActive: map['isActive'] ?? true,
+      );
+}
+
+class CompanyDepartment {
+  final String id;
+  final String name;
+  final bool isActive;
+
+  CompanyDepartment({
+    required this.id,
+    required this.name,
+    required this.isActive,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'isActive': isActive,
+      };
+
+  factory CompanyDepartment.fromMap(Map<String, dynamic> map) => CompanyDepartment(
+        id: map['id'] ?? '',
+        name: map['name'] ?? '',
+        isActive: map['isActive'] ?? true,
+      );
+}
+
+class PartUsage {
+  final String partName;
+  final String serialNumber;
+  final int quantity;
+
+  PartUsage({
+    required this.partName,
+    required this.serialNumber,
+    required this.quantity,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'partName': partName,
+        'serialNumber': serialNumber,
+        'quantity': quantity,
+      };
+
+  factory PartUsage.fromMap(Map<String, dynamic> map) => PartUsage(
+        partName: map['partName'] ?? '',
+        serialNumber: map['serialNumber'] ?? '',
+        quantity: map['quantity'] ?? 0,
+      );
+}
+
+class WorkOrder {
+  final String id;
+  final String workOrderNumber;
+  final String vehiclePlate;
+  final String vehicleId;
+  final String vehicleMake;
+  final String vehicleModel;
+  final String issueSummary;
+  final String requestedBy;
+  final String department;
+  final String technician;
+  final WorkOrderStatus status;
+  final DateTime createdAt;
+  final List<PartUsage> items;
+
+  WorkOrder({
+    required this.id,
+    required this.workOrderNumber,
+    required this.vehiclePlate,
+    required this.vehicleId,
+    required this.vehicleMake,
+    required this.vehicleModel,
+    required this.issueSummary,
+    required this.requestedBy,
+    required this.department,
+    required this.technician,
+    required this.status,
+    required this.createdAt,
+    this.items = const [],
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'workOrderNumber': workOrderNumber,
+        'vehiclePlate': vehiclePlate,
+        'vehicleId': vehicleId,
+        'vehicleMake': vehicleMake,
+        'vehicleModel': vehicleModel,
+        'issueSummary': issueSummary,
+        'requestedBy': requestedBy,
+        'department': department,
+        'technician': technician,
+        'status': status.name,
+        'createdAt': createdAt.toIso8601String(),
+        'items': items.map((item) => item.toMap()).toList(),
+      };
+
+  factory WorkOrder.fromMap(Map<String, dynamic> map) => WorkOrder(
+        id: map['id'] ?? '',
+        workOrderNumber: map['workOrderNumber'] ?? 'GRG-0',
+        vehiclePlate: map['vehiclePlate'] ?? '',
+        vehicleId: map['vehicleId'] ?? '',
+        vehicleMake: map['vehicleMake'] ?? '',
+        vehicleModel: map['vehicleModel'] ?? '',
+        issueSummary: map['issueSummary'] ?? '',
+        requestedBy: map['requestedBy'] ?? '',
+        department: map['department'] ?? '',
+        technician: map['technician'] ?? '',
+        status: WorkOrderStatus.values.firstWhere(
+          (value) => value.name == (map['status'] ?? WorkOrderStatus.pending.name),
+          orElse: () => WorkOrderStatus.pending,
+        ),
+        createdAt: DateTime.tryParse(map['createdAt'] ?? DateTime.now().toIso8601String()) ?? DateTime.now(),
+        items: ((map['items'] as List?) ?? [])
+            .map((item) => PartUsage.fromMap(item as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class AccidentReport {
+  final String id;
+  final String reportNumber;
+  final String vehiclePlate;
+  final String vehicleId;
+  final String driverName;
+  final String description;
+  final String severity;
+  final AccidentStatus status;
+  final DateTime createdAt;
+  final List<String> imagePaths;
+
+  AccidentReport({
+    required this.id,
+    required this.reportNumber,
+    required this.vehiclePlate,
+    required this.vehicleId,
+    required this.driverName,
+    required this.description,
+    required this.severity,
+    required this.status,
+    required this.createdAt,
+    this.imagePaths = const [],
+  });
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'reportNumber': reportNumber,
+        'vehiclePlate': vehiclePlate,
+        'vehicleId': vehicleId,
+        'driverName': driverName,
+        'description': description,
+        'severity': severity,
+        'status': status.name,
+        'createdAt': createdAt.toIso8601String(),
+        'imagePaths': imagePaths,
+      };
+
+  factory AccidentReport.fromMap(Map<String, dynamic> map) => AccidentReport(
+        id: map['id'] ?? '',
+        reportNumber: map['reportNumber'] ?? 'ACC-0',
+        vehiclePlate: map['vehiclePlate'] ?? '',
+        vehicleId: map['vehicleId'] ?? '',
+        driverName: map['driverName'] ?? '',
+        description: map['description'] ?? '',
+        severity: map['severity'] ?? 'Low',
+        status: AccidentStatus.values.firstWhere(
+          (value) => value.name == (map['status'] ?? AccidentStatus.open.name),
+          orElse: () => AccidentStatus.open,
+        ),
+        createdAt: DateTime.tryParse(map['createdAt'] ?? DateTime.now().toIso8601String()) ?? DateTime.now(),
+        imagePaths: (map['imagePaths'] as List? ?? []).map((e) => e.toString()).toList(),
+      );
 }
