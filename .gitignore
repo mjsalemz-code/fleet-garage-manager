@@ -1,123 +1,59 @@
-# Miscellaneous
-*.class
-*.lock
-*.log
-*.pyc
-*.swp
-.buildlog/
-.history
+import 'package:flutter/material.dart';
 
-# Flutter repo-specific
-/bin/cache/
-/bin/internal/bootstrap.bat
-/bin/internal/bootstrap.sh
-/bin/mingit/
-/dev/benchmarks/mega_gallery/
-/dev/bots/.recipe_deps
-/dev/bots/android_tools/
-/dev/devicelab/ABresults*.json
-/dev/docs/doc/
-/dev/docs/flutter.docs.zip
-/dev/docs/lib/
-/dev/docs/pubspec.yaml
-/dev/integration_tests/**/xcuserdata
-/dev/integration_tests/**/Pods
-/packages/flutter/coverage/
-version
-analysis_benchmark.json
+import '../models/models.dart';
 
-# packages file containing multi-root paths
-.packages.generated
+class SettingsScreen extends StatelessWidget {
+  final AppData appData;
+  final Future<void> Function() onChanged;
 
-# Flutter/Dart/Pub related
-**/doc/api/
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-**/generated_plugin_registrant.dart
-.packages
-.pub-preload-cache/
-.pub/
-build/
-flutter_*.png
-linked_*.ds
-unlinked.ds
-unlinked_spec.ds
+  const SettingsScreen({
+    super.key,
+    required this.appData,
+    required this.onChanged,
+  });
 
-# FVM Version Cache
-.fvm/
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('System Settings', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 18),
+            _SettingsTile(title: 'Garage Departments', subtitle: '${appData.garageDepartments.length} departments configured'),
+            _SettingsTile(title: 'Company Departments', subtitle: '${appData.companyDepartments.length} departments configured'),
+            _SettingsTile(title: 'Offline Backup', subtitle: 'JSON export/import support enabled'),
+            _SettingsTile(title: 'Camera Access', subtitle: 'Ready for plate scanning and accident images'),
+            _SettingsTile(title: 'PDF Export', subtitle: 'Work order and accident report output hooks available'),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-# Widget Preview related
-.widget_preview/
+class _SettingsTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
 
-# Android related
-**/android/**/gradle-wrapper.jar
-.gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-**/android/**/GeneratedPluginRegistrant.java
-**/android/key.properties
-*.jks
+  const _SettingsTile({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
 
-# iOS/XCode related
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/*sync/
-**/ios/**/.sconsign.dblite
-**/ios/**/.tags*
-**/ios/**/.vagrant/
-**/ios/**/DerivedData/
-**/ios/**/Icon?
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile
-**/ios/**/xcuserdata
-**/ios/.generated/
-**/ios/Flutter/.last_build_id
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/Generated.xcconfig
-**/ios/Flutter/ephemeral
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_export_environment.sh
-**/ios/ServiceDefinitions.json
-**/ios/Runner/GeneratedPluginRegistrant.*
-
-# macOS
-**/Flutter/ephemeral/
-**/Pods/
-**/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Flutter/ephemeral
-**/xcuserdata/
-
-# Windows
-**/windows/flutter/generated_plugin_registrant.cc
-**/windows/flutter/generated_plugin_registrant.h
-**/windows/flutter/generated_plugins.cmake
-
-# Linux
-**/linux/flutter/generated_plugin_registrant.cc
-**/linux/flutter/generated_plugin_registrant.h
-**/linux/flutter/generated_plugins.cmake
-
-# Coverage
-coverage/
-
-# Symbols
-app.*.symbols
-
-# Exceptions to above rules.
-!**/ios/**/default.mode1v3
-!**/ios/**/default.mode2v3
-!**/ios/**/default.pbxuser
-!**/ios/**/default.perspectivev3
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-!/dev/ci/**/Gemfile.lock
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        leading: const Icon(Icons.settings_applications_rounded),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.chevron_right_rounded),
+      ),
+    );
+  }
+}

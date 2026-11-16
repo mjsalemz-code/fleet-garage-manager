@@ -1,0 +1,37 @@
+name: fleet_garage_manager
+
+description: Offline fleet garage and accident management application for mobile and desktop.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  shared_preferences: ^2.2.3
+  path_provider: ^2.2.0
+  pdf: ^3.7.1
+  printing: ^5.12.0
+  file_picker: ^8.1.0
+  image_picker: ^1.0.0
+  permission_handler: ^11.0.0
+  mobile_scanner: ^5.2.0
+  fl_chart: ^0.68.0
+  excel: ^4.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
